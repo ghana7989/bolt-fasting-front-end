@@ -89,7 +89,7 @@ const MyResponsiveBar = ({
 			legendPosition: 'middle',
 			legendOffset: -40,
 		}}
-		enableGridX={true}
+		enableGridX={false}
 		enableGridY={false}
 		enableLabel={false}
 		legends={[]}
