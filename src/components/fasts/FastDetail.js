@@ -25,8 +25,8 @@ export const FastDetailContainer = styled.div`
 FastDetail.propTypes = {
 	valueLabel: PropTypes.string.isRequired,
 	value: PropTypes.oneOfType([
-		PropType.number.isRequired,
-		PropType.string.isRequired,
+		PropTypes.number.isRequired,
+		PropTypes.string.isRequired,
 	]),
 }
 

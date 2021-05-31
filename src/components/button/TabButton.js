@@ -1,16 +1,13 @@
 /** @format */
 
-import React, {useEffect} from 'react'
+import React from 'react'
 import styled from 'styled-components/macro'
 import {colors} from '../../theme/color'
 
 const TabButton = ({text}) => {
 	return (
 		<TabButtonContainer>
-			<button
-				className={`tabBtn-${text} ${
-					text === 'Week' && 'active'
-				}`}>
+			<button className={`tabBtn-${text} ${text === 'Week' && 'active'}`}>
 				{text}
 			</button>
 		</TabButtonContainer>
