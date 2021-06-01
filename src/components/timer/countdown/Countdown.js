@@ -8,7 +8,12 @@ import styled from 'styled-components/macro'
 import {useContext, useEffect} from 'react'
 import {DateContext} from '../../../context/DateContext'
 import {formatDate} from '../../../utils/formateDate'
-
+import {sub} from 'date-fns/esm'
+import {formatDistanceStrict} from 'date-fns'
+import axios from 'axios'
+import {URL} from '../../../data/constants/baseUrl'
+import {config} from '../../auth/Auth'
+import {userContext} from '../../../context/UserContext'
 // Countdown -> https://github.com/vydimitrov/react-countdown-circle-timer/tree/master/packages/web#react-countdown-circle-timer
 // https://github.com/vydimitrov/react-countdown-circle-timer#props-for-both-reactreact-native
 
@@ -38,8 +43,16 @@ const Countdown = ({
 	// console.log(format(new Date(), "dd-MMM', 'HH:mm bb"));
 	// console.log(isToday(new Date()))
 
-	const {date, dateFunctions, dateFunctionsInMilliSeconds, fastType} =
-		useContext(DateContext)
+	const {
+		date,
+		dateFunctions,
+		dateFunctionsInMilliSeconds,
+		fastType,
+		dateInMilliSeconds,
+	} = useContext(DateContext)
+	const {
+		user: {token},
+	} = useContext(userContext)
 	const handleTimerButtonClick = () => {
 		setIsTimerRunning(p => !p)
 		if (count > 0) {
@@ -54,6 +67,25 @@ const Countdown = ({
 		}
 	}
 
+	const {startDateInMilliSeconds, endDateInMilliSeconds} = dateInMilliSeconds
+	const postFastData = async date => {
+		// const {fastStartedAt, fastEndedAt, durationOfTheFast, fastType} = req.body
+		const durationOfTheFast = Number(
+			formatDistanceStrict(date, startDateInMilliSeconds).split(' ')[0],
+		)
+		const fastData = {
+			fastStartedAt: startDateInMilliSeconds,
+			fastEndedAt: date,
+			durationOfTheFast,
+			fastType,
+		}
+		const {data} = await axios.post(URL + '/fast-stats', fastData, {
+			headers: {Authorization: 'Bearer ' + token},
+		})
+		// console.log('data: ', data)
+	}
+	console.log('token: ', token)
+
 	return (
 		<CountdownCircleTimer
 			isPlaying={isTimerRunning}
@@ -67,6 +99,8 @@ const Countdown = ({
 				setDuration(duration)
 				setCount(duration)
 				dateFunctions.setEndDate(formatDate(new Date()))
+				dateFunctionsInMilliSeconds.setEndDateInMilliSeconds(new Date())
+				postFastData(new Date())
 				return [true, 1]
 			}}>
 			<CountdownContainer>

@@ -17,12 +17,12 @@ export const DateContextProvider = ({children}) => {
 		<DateContext.Provider
 			value={{
 				date: {startDate, endDate},
+				dateInMilliSeconds: {startDateInMilliSeconds, endDateInMilliSeconds},
 				dateFunctions: {setEndDate, setStartDate},
 				dateFunctionsInMilliSeconds: {
 					setEndDateInMilliSeconds,
 					setStartDateInMilliSeconds,
 				},
-				dateInMilliSeconds: {startDateInMilliSeconds, endDateInMilliSeconds},
 				fastType,
 			}}>
 			{children}

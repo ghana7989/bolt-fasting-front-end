@@ -10,6 +10,9 @@ import {format, hoursToSeconds} from 'date-fns'
 import {secondsToHms} from '../../utils/secondsToHms'
 import {DateContext} from '../../context/DateContext'
 
+// TO-DO use formatRelative in Fast Ended 
+
+
 const Timer = () => {
 	const [isTimerRunning, setIsTimerRunning] = useState(false)
 	const {setFastType, FAST_TYPES, fastType} = useContext(FastTypeContext)
