@@ -1,6 +1,6 @@
 /** @format */
 
-import React, {useContext, useEffect, useState} from 'react'
+import React, {createRef, useContext, useEffect, useState} from 'react'
 import styled from 'styled-components'
 import {colors} from '../../theme/color'
 import Countdown from './countdown/Countdown'
@@ -9,16 +9,24 @@ import {FastTypeContext} from '../../context/FastTypeContext'
 import {format, hoursToSeconds} from 'date-fns'
 import {secondsToHms} from '../../utils/secondsToHms'
 import {DateContext} from '../../context/DateContext'
-
-// TO-DO use formatRelative in Fast Ended 
-
+import Modal from '../modal/Modal'
+import {ModalContainer, ModalForm, TextInputContainer} from '../auth/Auth'
+import OutsideClickHandler from '../HOC/OutsideClickHandler'
+import PillButton, {PillBtn} from '../button/PillButton'
+import Spacer from '../HOC/Spacer'
+import {formatDate} from '../../utils/formateDate'
+import axios from 'axios'
+import {userContext} from '../../context/UserContext'
+import {URL} from '../../data/constants/baseUrl'
+import {FastContext} from '../../context/FastContext'
+// TO-DO use formatRelative in Fast Ended
 
 const Timer = () => {
 	const [isTimerRunning, setIsTimerRunning] = useState(false)
 	const {setFastType, FAST_TYPES, fastType} = useContext(FastTypeContext)
 	const [duration, setDuration] = useState(
 		// () => Number(hoursToSeconds(Number(fastType.split(':')[0]))),
-		Number(hoursToSeconds(0.001) + 7),
+		Number(hoursToSeconds(0.001)),
 	)
 	const [count, setCount] = useState(duration)
 	const handleSetDuration = value => setDuration(value)
@@ -34,7 +42,15 @@ const Timer = () => {
 
 	const {
 		date: {startDate, endDate},
+		dateInMilliSeconds: {startDateInMilliSeconds, endDateInMilliSeconds},
+		dateFunctions: {setEndDate, setStartDate},
+		dateFunctionsInMilliSeconds: {
+			setEndDateInMilliSeconds,
+			setStartDateInMilliSeconds,
+		},
 	} = useContext(DateContext)
+
+	const {user} = useContext(userContext)
 
 	useEffect(() => {
 		if (isTimerRunning) {
@@ -52,39 +68,144 @@ const Timer = () => {
 	const handleSelectChange = e => {
 		setFastType(e.target.value)
 	}
+
+	const [isModal, setIsModal] = useState(false)
+	const dateRef = createRef()
+	const [temp, setTemp] = useState(undefined)
+	const {fasts, setFasts} = useContext(FastContext)
+
+	const handleOnDateUpdateSubmit = async () => {
+		setIsModal(false)
+		if (!dateRef.current.value) {
+			return
+		}
+		const id = startDateInMilliSeconds
+		console.log('id: ', id)
+
+		const rawDateTime = dateRef.current.value
+		const formattedDateTime = formatDate(rawDateTime)
+		// setIsModal(false)
+		if (temp === 'startedAt') {
+			setStartDateInMilliSeconds(rawDateTime)
+			setStartDate(formattedDateTime)
+			const {data} = await axios.put(
+				`${URL}/fast-stats`,
+				{
+					fastStartedAt: rawDateTime,
+					id,
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${user?.token}`,
+					},
+				},
+			)
+		} else if (temp === 'endedAt') {
+			setEndDateInMilliSeconds(rawDateTime)
+			setEndDate(formattedDateTime)
+			const {data} = await axios.put(
+				`${URL}/fast-stats`,
+				{
+					fastEndedAt: rawDateTime,
+					id,
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${user?.token}`,
+					},
+				},
+			)
+		}
+		const getUserStats = async () => {
+			const {data} = await axios({
+				method: 'get',
+				url: `${URL}/fast-stats`,
+				headers: {
+					Authorization: `Bearer ${user?.token}`,
+				},
+			})
+			console.log('data: ', data)
+			setFasts(data.fasts)
+		}
+		getUserStats()
+	}
+	const handleOnStartDateChangeClick = () => {
+		if (startDate && endDate) {
+			setIsModal(true)
+			setTemp('startedAt')
+		}
+	}
+	const handleOnEndDateChangeClick = () => {
+		if (startDate && endDate) {
+			setIsModal(true)
+			setTemp('endedAt')
+		}
+	}
 	return (
-		<TimerContainer>
-			<FastingPlan onChange={handleSelectChange}>
-				<option value='16:8'>{FAST_TYPES.easy}</option>
-				<option value='18:9'>{FAST_TYPES.medium}</option>
-				<option value='20:4'>{FAST_TYPES.hard}</option>
-			</FastingPlan>
-			<CountdownContainer>
-				<Countdown
-					isTimerRunning={isTimerRunning}
-					setIsTimerRunning={setIsTimerRunning}
-					duration={duration}
-					setDuration={handleSetDuration}
-					setCount={setCount}
-					count={count}
-					time={time}
-				/>
-			</CountdownContainer>
-			<FastingStatusContainer>
-				<div className='status'>
-					<h3>STARTED</h3>
-					<p>
-						{/* 14 Feb, 9:45 <Pencil /> */}
-						{startDate ? startDate : 'Start Now'} <Pencil />
-					</p>
-				</div>
-				<div className='status'>
-					<h3>FAST ENDED</h3>
-					{/* <p>Today, 1:45</p> */}
-					<p>{endDate ? endDate : 'Not Yet Ended'}</p>
-				</div>
-			</FastingStatusContainer>
-		</TimerContainer>
+		<>
+			{isModal ? (
+				<Modal>
+					<ModalContainer>
+						<OutsideClickHandler onOutSideClick={() => setIsModal(false)}>
+							<ModalForm>
+								<TextInputContainer>
+									<input
+										ref={dateRef}
+										id='date'
+										type='datetime-local'
+										name='date'
+										placeholder='Select the date'
+									/>
+									<label>Date</label>
+									<Spacer height={60} />
+									<PillButton
+										bgColor={colors.peach}
+										color={colors.blueDark}
+										text='Update'
+										onClick={handleOnDateUpdateSubmit}
+									/>
+								</TextInputContainer>
+							</ModalForm>
+						</OutsideClickHandler>
+					</ModalContainer>
+				</Modal>
+			) : (
+				<TimerContainer>
+					<FastingPlan onChange={handleSelectChange}>
+						<option value='16:8'>{FAST_TYPES.easy}</option>
+						<option value='18:9'>{FAST_TYPES.medium}</option>
+						<option value='20:4'>{FAST_TYPES.hard}</option>
+					</FastingPlan>
+					<CountdownContainer>
+						<Countdown
+							isTimerRunning={isTimerRunning}
+							setIsTimerRunning={setIsTimerRunning}
+							duration={duration}
+							setDuration={handleSetDuration}
+							setCount={setCount}
+							count={count}
+							time={time}
+						/>
+					</CountdownContainer>
+					<FastingStatusContainer>
+						<div className='status'>
+							<h3>STARTED</h3>
+							<p onClick={handleOnStartDateChangeClick}>
+								{/* 14 Feb, 9:45 <Pencil /> */}
+								{startDate ? startDate : 'Start Now'} <Pencil />
+							</p>
+						</div>
+						<div className='status'>
+							<h3>FAST ENDED</h3>
+							{/* <p>Today, 1:45</p> */}
+							<p onClick={handleOnEndDateChangeClick}>
+								{endDate ? endDate : 'Not Yet Ended'} <Pencil />
+							</p>
+						</div>
+					</FastingStatusContainer>
+				</TimerContainer>
+			)}
+		</>
 	)
 }
 
@@ -134,7 +255,7 @@ export const CountdownContainer = styled.div`
 	/* margin: 1rem 0px 4rem; */
 `
 export const FastingStatusContainer = styled.div`
-	width: 100%;
+	width: 110%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;

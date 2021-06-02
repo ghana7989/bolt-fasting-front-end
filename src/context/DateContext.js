@@ -12,7 +12,12 @@ export const DateContextProvider = ({children}) => {
 	const [endDate, setEndDate] = useState(undefined)
 	const [endDateInMilliSeconds, setEndDateInMilliSeconds] = useState(undefined)
 	const {fastType} = useContext(FastTypeContext)
-
+	const resetDateContext = () => {
+		setStartDate(undefined)
+		setStartDateInMilliSeconds(undefined)
+		setEndDate(undefined)
+		setEndDateInMilliSeconds(undefined)
+	}
 	return (
 		<DateContext.Provider
 			value={{
@@ -24,6 +29,7 @@ export const DateContextProvider = ({children}) => {
 					setStartDateInMilliSeconds,
 				},
 				fastType,
+				resetDateContext,
 			}}>
 			{children}
 		</DateContext.Provider>

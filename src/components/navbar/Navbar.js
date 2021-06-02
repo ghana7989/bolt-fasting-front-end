@@ -8,6 +8,7 @@ import Avatar from '../../assets/avataaar.png'
 import {Container} from 'react-bootstrap'
 import Auth from '../auth/Auth'
 import {userContext} from '../../context/UserContext'
+import {DateContext} from '../../context/DateContext'
 
 export const Navbar = styled.nav`
 	display: flex;
@@ -34,15 +35,17 @@ const Nav = () => {
 	const [showModal, setShowModal] = useState(false)
 	const [authType, setAuthType] = useState('')
 	const {user, setUser} = useContext(userContext)
+	const DateContextObj = useContext(DateContext)
 	if (user) {
 		const {name, email} = user
 	}
-	console.log('user: ', user)
+
 	const handleClick = e => {
 		setAuthType(e.target.innerText)
 		if (e.target.innerText === 'Logout') {
 			localStorage.removeItem('userInfo')
 			setUser(null)
+			DateContextObj?.resetDateContext()
 			return
 		}
 		setShowModal(p => !p)

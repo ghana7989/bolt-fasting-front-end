@@ -28,20 +28,9 @@ const Countdown = ({
 	count,
 	time: {hours, minutes, seconds},
 }) => {
-	// structure of DateContext
-	// value={{
-	// date: {startDate, endDate},
-	// dateFunctions: {setEndDate, setStartDate},
-	// dateFunctionsInMilliSeconds: {
-	// 	setEndDateInMilliSeconds,
-	// 	setStartDateInMilliSeconds,
-	// },
-	// dateInMilliSeconds: {startDateInMilliSeconds, endDateInMilliSeconds},
-	// fastType,
-	// }}
 	// Format of date - dd mon, time
-	// console.log(format(new Date(), "dd-MMM', 'HH:mm bb"));
-	// console.log(isToday(new Date()))
+	//
+	//
 
 	const {
 		date,
@@ -50,9 +39,7 @@ const Countdown = ({
 		fastType,
 		dateInMilliSeconds,
 	} = useContext(DateContext)
-	const {
-		user: {token},
-	} = useContext(userContext)
+	const {user} = useContext(userContext)
 	const handleTimerButtonClick = () => {
 		setIsTimerRunning(p => !p)
 		if (count > 0) {
@@ -80,11 +67,10 @@ const Countdown = ({
 			fastType,
 		}
 		const {data} = await axios.post(URL + '/fast-stats', fastData, {
-			headers: {Authorization: 'Bearer ' + token},
+			headers: {Authorization: 'Bearer ' + user?.token},
 		})
-		// console.log('data: ', data)
+		//
 	}
-	console.log('token: ', token)
 
 	return (
 		<CountdownCircleTimer

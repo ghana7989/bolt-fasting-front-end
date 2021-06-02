@@ -1,43 +1,52 @@
 /** @format */
 
-import React from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import styled from 'styled-components/macro'
-
+import {FastContext} from '../../../context/FastContext'
+import axios from 'axios'
 import FastDetail from '../FastDetail'
-
-const FAST_STATS_DATA = [
-	{
-		label: 'Total Fasts',
-		value: 14,
-	},
-	{
-		label: '7-fast avg',
-		value: '16h',
-	},
-	{
-		label: 'Longest Fast',
-		value: '18.1h',
-	},
-	{
-		label: 'Longest Streak',
-		value: 14,
-	},
-	{
-		label: 'Current Streak',
-		value: 14,
-	},
-]
+import {URL} from '../../../data/constants/baseUrl'
+import {userContext} from '../../../context/UserContext'
+import {secondsToHours} from 'date-fns/esm'
 
 const FastsStats = () => {
+	const {user} = useContext(userContext)
+	const [userFastStats, setUserFastStats] = useState(undefined)
+	useEffect(() => {
+		;(async function () {
+			const {data} = await axios.get(`${URL}/fast-stats`, {
+				headers: {
+					Authorization: `Bearer ${user?.token}`,
+				},
+			})
+
+			const averageFastDurationInHours = secondsToHours(
+				Number(data.averageFastDuration),
+			)
+			setUserFastStats({
+				...data,
+				averageFastDuration: averageFastDurationInHours,
+			})
+		})()
+	}, [])
+
 	return (
 		<FastsStatsContainer>
-			{FAST_STATS_DATA.map(({label, value}) => (
-				<FastDetail
-					key={label}
-					valueLabel={label}
-					value={value}
-				/>
-			))}
+			<FastDetail
+				valueLabel='Total Fasts'
+				value={!userFastStats ? 14 : userFastStats?.totalNumberOfFasts}
+				// value={14}
+			/>
+			<FastDetail
+				valueLabel='Average Fast Duration'
+				value={'16h'}
+				value={
+					!userFastStats ? '16h' : userFastStats?.averageFastDuration + 'h'
+				}
+			/>
+			<FastDetail valueLabel='Longest Fast' value={'18.1h'} />
+			<FastDetail valueLabel='Longest Streak' value={14} />
+			<FastDetail valueLabel='Current Streak' value={14} />
 		</FastsStatsContainer>
 	)
 }

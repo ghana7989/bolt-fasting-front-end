@@ -1,14 +1,24 @@
 /** @format */
 
-import React from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import MyResponsiveBar from './ResponsiveBars'
 import styled from 'styled-components'
 import {colors} from '../../../theme/color'
+import axios from 'axios'
+import {userContext} from '../../../context/UserContext'
+import {URL} from '../../../data/constants/baseUrl'
+import {FastContext} from '../../../context/FastContext'
+import {GraphContext} from '../../../context/GraphDataContext'
+import {convertData} from '../../../hooks/useConvertData'
 
 const RecentFasts = () => {
+	const {user} = useContext(userContext)
+	const {fasts, setFasts} = useContext(FastContext)
+	const graphData = convertData(fasts)
+
 	return (
 		<RecentFastsContainer>
-			<MyResponsiveBar />
+			<MyResponsiveBar fasts={graphData} />
 		</RecentFastsContainer>
 	)
 }

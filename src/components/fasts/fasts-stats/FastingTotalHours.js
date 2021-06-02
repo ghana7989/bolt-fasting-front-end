@@ -1,13 +1,36 @@
 /** @format */
 
-import React from 'react'
+import React, {useContext, useEffect} from 'react'
 import ResponsiveBarGraph from './ResponsiveBarGraph'
 import styled from 'styled-components/macro'
 import {RecentFastsContainer} from '../recent-fasts/RecentFasts'
 import TabButton from '../../button/TabButton'
 import {colors} from '../../../theme/color'
+import {FastContext} from '../../../context/FastContext'
+import axios from 'axios'
+import {userContext} from '../../../context/UserContext'
+import {GraphContext} from '../../../context/GraphDataContext'
+import {convertData} from '../../../hooks/useConvertData'
+import {URL} from '../../../data/constants/baseUrl'
 
 const FastingTotalHours = () => {
+	const {user} = useContext(userContext)
+	const {fasts, setFasts} = useContext(FastContext)
+	console.log('fasts: ', fasts)
+	const graphData = convertData(fasts)
+	const getUserStats = async () => {
+		const {data} = await axios({
+			method: 'get',
+			url: `${URL}/fast-stats`,
+			headers: {
+				Authorization: `Bearer ${user?.token}`,
+			},
+		})
+		setFasts(data.fasts)
+	}
+	useEffect(() => {
+		getUserStats()
+	}, [])
 	return (
 		<FastingTotalHoursContainer>
 			<Tabs>
@@ -17,14 +40,12 @@ const FastingTotalHours = () => {
 					<TabButton text='Year' />
 				</TabButtons>
 			</Tabs>
-			<ResponsiveBarGraph />
+			<ResponsiveBarGraph fasts={graphData} />
 		</FastingTotalHoursContainer>
 	)
 }
 
-export const FastingTotalHoursContainer = styled(
-	RecentFastsContainer,
-)`
+export const FastingTotalHoursContainer = styled(RecentFastsContainer)`
 	position: relative;
 `
 export const Tabs = styled.div`
