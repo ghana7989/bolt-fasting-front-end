@@ -23,13 +23,16 @@ const FastsStats = () => {
 			const averageFastDurationInHours = secondsToHours(
 				Number(data.averageFastDuration),
 			)
+			const longestFastDurationInHours = secondsToHours(
+				Number(data.longestFastDuration),
+			)
 			setUserFastStats({
 				...data,
 				averageFastDuration: averageFastDurationInHours,
+				longestFastDuration: longestFastDurationInHours,
 			})
 		})()
 	}, [])
-
 	return (
 		<FastsStatsContainer>
 			<FastDetail
@@ -44,9 +47,20 @@ const FastsStats = () => {
 					!userFastStats ? '16h' : userFastStats?.averageFastDuration + 'h'
 				}
 			/>
-			<FastDetail valueLabel='Longest Fast' value={'18.1h'} />
-			<FastDetail valueLabel='Longest Streak' value={14} />
-			<FastDetail valueLabel='Current Streak' value={14} />
+			<FastDetail
+				valueLabel='Longest Fast'
+				value={
+					!userFastStats ? '18.1h' : userFastStats?.longestFastDuration + 'h'
+				}
+			/>
+			<FastDetail
+				valueLabel='Longest Streak'
+				value={userFastStats?.longestStreak ? userFastStats?.longestStreak : 10}
+			/>
+			<FastDetail
+				valueLabel='Current Streak'
+				value={userFastStats?.currentStreak ? userFastStats?.currentStreak : 5}
+			/>
 		</FastsStatsContainer>
 	)
 }

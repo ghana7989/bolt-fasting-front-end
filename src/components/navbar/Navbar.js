@@ -46,6 +46,7 @@ const Nav = () => {
 			localStorage.removeItem('userInfo')
 			setUser(null)
 			DateContextObj?.resetDateContext()
+			window.location.reload()
 			return
 		}
 		setShowModal(p => !p)

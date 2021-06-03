@@ -73,7 +73,7 @@ export const GraphContextProvider = ({children}) => {
 
 	useEffect(() => {
 		// setGraphData(tempGraphData)
-		if (user.token) {
+		if (user?.token) {
 			getUserStats()
 		}
 	}, [user])
